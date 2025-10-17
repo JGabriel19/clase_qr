@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Escanear Asistencia</title>
+    <style>
+      body {
+        font-family: Arial;
+        text-align: center;
+        padding: 20px;
+      }
+      #reader {
+        width: 320px;
+        margin: auto;
+      }
+      #status {
+        margin-top: 20px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Escanear código QR</h2>
+    <div id="reader"></div>
+    <div id="status"></div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+      const scriptURL =
+        "https://script.google.com/macros/s/AKfycbwDt5m5p0k9sNht-_80uds7mMHj64mTs7imqGz3BXplWEqI7ELaY_hbUqVf5ajt13-p/exec"; // termina en /exec
+      const statusEl = document.getElementById("status");
+
+      function registrarAsistencia(data) {
+        fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify({
+            codigo: data.codigo,
+            nombre: data.nombre,
+            metodo: "QR",
+          }),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((res) => res.json())
+          .then((r) => {
+            statusEl.innerText = r.mensaje || "Registrado";
+          })
+          .catch(() => {
+            statusEl.innerText = "Error al registrar";
+          });
+      }
+
+      function onScanSuccess(decodedText) {
+        try {
+          const data = JSON.parse(decodedText);
+          registrarAsistencia(data);
+          statusEl.innerText = `Asistencia de ${data.nombre} (${data.codigo}) registrada ✅`;
+        } catch (e) {
+          statusEl.innerText = "QR inválido";
+        }
+      }
+
+      const html5QrCode = new Html5Qrcode("reader");
+      Html5Qrcode.getCameras()
+        .then((cameras) => {
+          if (cameras && cameras.length) {
+            html5QrCode.start(
+              cameras[0].id,
+              { fps: 10, qrbox: 250 },
+              onScanSuccess
+            );
+          } else {
+            statusEl.innerText = "No se encontró cámara";
+          }
+        })
+        .catch((err) => {
+          statusEl.innerText = "Error accediendo a la cámara";
+        });
+    </script>
+  </body>
+</html>
