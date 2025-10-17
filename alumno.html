@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Mi QR - Asistencia</title>
+    <style>
+      body {
+        font-family: Arial;
+        text-align: center;
+        padding: 20px;
+      }
+      #qrcode {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 id="nombre"></h2>
+    <div id="qrcode"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+      // Ejemplo: alumno.html?codigo=202501&nombre=Gabriel%20Quispe
+      const params = new URLSearchParams(window.location.search);
+      const codigo = params.get("codigo");
+      const nombre = params.get("nombre");
+
+      document.getElementById("nombre").innerText = nombre;
+
+      const dataQR = JSON.stringify({ codigo, nombre });
+      new QRCode(document.getElementById("qrcode"), {
+        text: dataQR,
+        width: 250,
+        height: 250,
+      });
+    </script>
+  </body>
+</html>
